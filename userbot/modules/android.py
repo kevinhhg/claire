@@ -3,236 +3,334 @@
 # Licensed under the Raphielscape Public License, Version 1.d (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot initialization. """
+""" Userbot module containing commands related to android"""
 
+import asyncio
+import json
+import math
 import os
+import re
 import time
-from distutils.util import strtobool as sb
-from logging import DEBUG, INFO, basicConfig, getLogger
-from sys import version_info
 
-from dotenv import load_dotenv
-from pylast import LastFMNetwork, md5
-from pySmartDL import SmartDL
-from telethon import TelegramClient
-from telethon.sessions import StringSession
+from bs4 import BeautifulSoup
+from requests import get
 
-load_dotenv("config.env")
+from userbot import CMD_HELP, TEMP_DOWNLOAD_DIRECTORY
+from userbot.events import register
+from userbot.utils import chrome, human_to_bytes, humanbytes, md5, time_formatter
 
-StartTime = time.time()
+GITHUB = "https://github.com"
 
-# Bot Logs setup:
-CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE") or "False")
 
-if CONSOLE_LOGGER_VERBOSE:
-    basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=DEBUG,
+@register(outgoing=True, pattern="^.magisk$")
+async def magisk(request):
+    """ magisk latest releases """
+    magisk_dict = {
+        "Stable": "https://raw.githubusercontent.com/topjohnwu/magisk_files/master/stable.json",
+        "Beta": "https://raw.githubusercontent.com/topjohnwu/magisk_files/master/beta.json",
+        "Canary": "https://raw.githubusercontent.com/topjohnwu/magisk_files/canary/canary.json",
+    }
+    releases = "Latest Magisk Releases:\n"
+    for name, release_url in magisk_dict.items():
+        data = get(release_url).json()
+        if str(name) == "Canary":
+            data["magisk"]["link"] = "https://github.com/topjohnwu/magisk_files/raw/canary/" + data["magisk"]["link"]
+            data["app"]["link"] = "https://github.com/topjohnwu/magisk_files/raw/canary/" + data["app"]["link"]
+            data["uninstaller"]["link"] = "https://github.com/topjohnwu/magisk_files/raw/canary/" + data["uninstaller"]["link"]
+
+        releases += f'{name}: [ZIP v{data["magisk"]["version"]}]({data["magisk"]["link"]}) | ' \
+                    f'[APK v{data["app"]["version"]}]({data["app"]["link"]}) | ' \
+                    f'[Uninstaller]({data["uninstaller"]["link"]})\n'
+    await request.edit(releases)
+
+
+@register(outgoing=True, pattern=r"^.device(?: |$)(\S*)")
+async def device_info(request):
+    """ get android device basic info from its codename """
+    textx = await request.get_reply_message()
+    codename = request.pattern_match.group(1)
+    if codename:
+        pass
+    elif textx:
+        codename = textx.text
+    else:
+        await request.edit("`Usage: .device <codename> / <model>`")
+        return
+    data = json.loads(
+        get(
+            "https://raw.githubusercontent.com/androidtrackers/"
+            "certified-android-devices/master/by_device.json"
+        ).text
     )
-else:
-    basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=INFO
-    )
-LOGS = getLogger(__name__)
-
-if version_info[0] < 3 or version_info[1] < 8:
-    LOGS.info(
-        "You MUST have a python version of at least 3.8."
-        "Multiple features depend on this. Bot quitting."
-    )
-    quit(1)
-
-# Check if the config was edited by using the already used variable.
-# Basically, its the 'virginity check' for the config file ;)
-CONFIG_CHECK = (
-    os.environ.get("___________PLOX_______REMOVE_____THIS_____LINE__________") or None
-)
-
-if CONFIG_CHECK:
-    LOGS.info(
-        "Please remove the line mentioned in the first hashtag from the config.env file"
-    )
-    quit(1)
-
-# Telegram App KEY and HASH
-API_KEY = os.environ.get("API_KEY") or None
-API_HASH = os.environ.get("API_HASH") or None
+    results = data.get(codename)
+    if results:
+        reply = f"**Search results for {codename}**:\n\n"
+        for item in results:
+            reply += (
+                f"**Brand**: {item['brand']}\n"
+                f"**Name**: {item['name']}\n"
+                f"**Model**: {item['model']}\n\n"
+            )
+    else:
+        reply = f"`Couldn't find info about {codename}!`\n"
+    await request.edit(reply)
 
 
-# Userbot Session String
-STRING_SESSION = os.environ.get("STRING_SESSION") or None
+@register(outgoing=True, pattern=r"^.codename(?: |)([\S]*)(?: |)([\s\S]*)")
+async def codename_info(request):
+    """ search for android codename """
+    textx = await request.get_reply_message()
+    brand = request.pattern_match.group(1).lower()
+    device = request.pattern_match.group(2).lower()
 
-# Deezloader
-DEEZER_ARL_TOKEN = os.environ.get("DEEZER_ARL_TOKEN") or None
-
-# Logging channel/group ID configuration.
-BOTLOG_CHATID = int(os.environ.get("BOTLOG_CHATID") or 0)
-
-# Userbot logging feature switch.
-BOTLOG = sb(os.environ.get("BOTLOG") or "False")
-if BOTLOG:
-    LOGSPAMMER = sb(os.environ.get("LOGSPAMMER") or "False")
-else:
-    LOGSPAMMER = False
-
-# Bleep Blop, this is a bot ;)
-PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN") or "False")
-
-# Heroku Credentials for updater.
-HEROKU_MEMEZ = sb(os.environ.get("HEROKU_MEMEZ") or "False")
-HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME") or None
-HEROKU_API_KEY = os.environ.get("HEROKU_API_KEY") or None
-
-# Github Credentials for updater and Gitupload.
-GIT_REPO_NAME = os.environ.get("GIT_REPO_NAME") or None
-GITHUB_ACCESS_TOKEN = os.environ.get("GITHUB_ACCESS_TOKEN") or None
-
-# Custom (forked) repo URL and BRANCH for updater.
-UPSTREAM_REPO_URL = (
-    os.environ.get("UPSTREAM_REPO_URL") or "https://github.com/MoveAngel/One4uBot.git"
-)
-UPSTREAM_REPO_BRANCH = os.environ.get("UPSTREAM_REPO_BRANCH") or "sql-extended"
-
-# Console verbose logging
-CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE") or "False")
-
-# SQL Database URI
-DB_URI = os.environ.get("DATABASE_URL") or None
-
-# OCR API key
-OCR_SPACE_API_KEY = os.environ.get("OCR_SPACE_API_KEY") or None
-
-# remove.bg API key
-REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY") or None
-
-# Chrome Driver and Headless Google Chrome Binaries
-CHROME_DRIVER = os.environ.get("CHROME_DRIVER") or None
-GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN") or None
-
-# OpenWeatherMap API Key
-OPEN_WEATHER_MAP_APPID = os.environ.get("OPEN_WEATHER_MAP_APPID") or None
-WEATHER_DEFCITY = os.environ.get("WEATHER_DEFCITY") or None
-WEATHER_DEFLANG = os.environ.get("WEATHER_DEFLANG") or None
-
-# Genius lyrics API
-GENIUS = os.environ.get("GENIUS_ACCESS_TOKEN") or None
-
-# Wolfram Alpha API
-WOLFRAM_ID = os.environ.get("WOLFRAM_ID") or None
-
-# Anti Spambot Config
-ANTI_SPAMBOT = sb(os.environ.get("ANTI_SPAMBOT") or "False")
-ANTI_SPAMBOT_SHOUT = sb(os.environ.get("ANTI_SPAMBOT_SHOUT") or "False")
-
-# Default .alive name
-ALIVE_NAME = os.environ.get("ALIVE_NAME") or None
-
-# Default .alive logo
-ALIVE_LOGO = os.environ.get("ALIVE_LOGO") or None
-
-# Time & Date - Country and Time Zone
-COUNTRY = str(os.environ.get("COUNTRY") or "")
-TZ_NUMBER = int(os.environ.get("TZ_NUMBER") or 1)
-
-# Version of One4uBot
-USERBOT_VERSION = os.environ.get("USERBOT_VERSION") or "3.7"
-
-# User Terminal alias
-USER_TERM_ALIAS = os.environ.get("USER_TERM_ALIAS") or "One4uBot"
-
-# Updater alias
-UPDATER_ALIAS = os.environ.get("UPDATER_ALIAS") or "One4uBot"
-
-# Zipfile module
-ZIP_DOWNLOAD_DIRECTORY = os.environ.get("ZIP_DOWNLOAD_DIRECTORY") or "./zips"
-
-# Clean Welcome
-CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME") or "True")
-
-# Last.fm Module
-BIO_PREFIX = os.environ.get("BIO_PREFIX") or None
-DEFAULT_BIO = os.environ.get("DEFAULT_BIO") or None
-
-LASTFM_API = os.environ.get("LASTFM_API") or None
-LASTFM_SECRET = os.environ.get("LASTFM_SECRET") or None
-LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME") or None
-LASTFM_PASSWORD_PLAIN = os.environ.get("LASTFM_PASSWORD") or None
-LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
-if LASTFM_API is not None:
-    lastfm = LastFMNetwork(
-        api_key=LASTFM_API,
-        api_secret=LASTFM_SECRET,
-        username=LASTFM_USERNAME,
-        password_hash=LASTFM_PASS,
-    )
-else:
-    lastfm = None
-
-# Google Drive Module
-G_DRIVE_DATA = os.environ.get("G_DRIVE_DATA") or None
-G_DRIVE_CLIENT_ID = os.environ.get("G_DRIVE_CLIENT_ID") or None
-G_DRIVE_CLIENT_SECRET = os.environ.get("G_DRIVE_CLIENT_SECRET") or None
-G_DRIVE_AUTH_TOKEN_DATA = os.environ.get("G_DRIVE_AUTH_TOKEN_DATA") or None
-G_DRIVE_FOLDER_ID = os.environ.get("G_DRIVE_FOLDER_ID") or None
-TEMP_DOWNLOAD_DIRECTORY = os.environ.get("TMP_DOWNLOAD_DIRECTORY") or "./downloads"
-
-# Uptobox
-USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX", None)
-
-
-# Setting Up CloudMail.ru and MEGA.nz extractor binaries,
-# and giving them correct perms to work properly.
-if not os.path.exists("bin"):
-    os.mkdir("bin")
-
-binaries = {
-    "https://raw.githubusercontent.com/adekmaulana/megadown/master/megadown": "bin/megadown",
-    "https://raw.githubusercontent.com/yshalsager/cmrudl.py/master/cmrudl.py": "bin/cmrudl",
-}
-
-for binary, path in binaries.items():
-    downloader = SmartDL(binary, path, progress_bar=False)
-    downloader.start()
-    os.chmod(path, 0o755)
-
-# 'bot' variable
-if STRING_SESSION:
-    # pylint: disable=invalid-name
-    bot = TelegramClient(StringSession(STRING_SESSION), API_KEY, API_HASH)
-else:
-    # pylint: disable=invalid-name
-    bot = TelegramClient("userbot", API_KEY, API_HASH)
-
-
-async def check_botlog_chatid():
-    if not BOTLOG:
+    if brand and device:
+        pass
+    elif textx:
+        brand = textx.text.split(" ")[0]
+        device = " ".join(textx.text.split(" ")[1:])
+    else:
+        await request.edit("`Usage: .codename <brand> <device>`")
         return
 
-    entity = await bot.get_entity(BOTLOG_CHATID)
-    if entity.default_banned_rights.send_messages:
-        LOGS.info(
-            "Your account doesn't have rights to send messages to BOTLOG_CHATID "
-            "group. Check if you typed the Chat ID correctly."
+    data = json.loads(
+        get(
+            "https://raw.githubusercontent.com/androidtrackers/"
+            "certified-android-devices/master/by_brand.json"
+        ).text
+    )
+    devices_lower = {k.lower(): v for k, v in data.items()}  # Lower brand names in JSON
+    devices = devices_lower.get(brand)
+    results = [
+        i
+        for i in devices
+        if i["name"].lower() == device.lower() or i["model"].lower() == device.lower()
+    ]
+    if results:
+        reply = f"**Search results for {brand} {device}**:\n\n"
+        if len(results) > 8:
+            results = results[:8]
+        for item in results:
+            reply += (
+                f"**Device**: {item['device']}\n"
+                f"**Name**: {item['name']}\n"
+                f"**Model**: {item['model']}\n\n"
+            )
+    else:
+        reply = f"`Couldn't find {device} codename!`\n"
+    await request.edit(reply)
+
+
+@register(outgoing=True, pattern="^.pixeldl(?: |$)(.*)")
+async def download_api(dl):
+    await dl.edit("`Collecting information...`")
+    URL = dl.pattern_match.group(1)
+    URL_MSG = await dl.get_reply_message()
+    if URL:
+        pass
+    elif URL_MSG:
+        URL = URL_MSG.text
+    else:
+        await dl.edit("`Empty information...`")
+        return
+    if not re.findall(r"\bhttps?://download.*pixelexperience.*\.org\S+", URL):
+        await dl.edit("`Invalid information...`")
+        return
+    driver = await chrome()
+    await dl.edit("`Getting information...`")
+    driver.get(URL)
+    error = driver.find_elements_by_class_name("swal2-content")
+    if len(error) > 0:
+        if error[0].text == "File Not Found.":
+            await dl.edit(f"`FileNotFoundError`: {URL} is not found.")
+            return
+    datas = driver.find_elements_by_class_name("download__meta")
+    """ - enumerate data to make sure we download the matched version - """
+    md5_origin = None
+    i = None
+    for index, value in enumerate(datas):
+        for data in value.text.split("\n"):
+            if data.startswith("MD5"):
+                md5_origin = data.split(":")[1].strip()
+                i = index
+                break
+        if md5_origin is not None and i is not None:
+            break
+    if md5_origin is None and i is None:
+        await dl.edit("`There is no match version available...`")
+    if URL.endswith("/"):
+        file_name = URL.split("/")[-2]
+    else:
+        file_name = URL.split("/")[-1]
+    file_path = TEMP_DOWNLOAD_DIRECTORY + file_name
+    download = driver.find_elements_by_class_name("download__btn")[i]
+    download.click()
+    await dl.edit("`Starting download...`")
+    file_size = human_to_bytes(download.text.split(None, 3)[-1].strip("()"))
+    display_message = None
+    complete = False
+    start = time.time()
+    while complete is False:
+        if os.path.isfile(file_path + ".crdownload"):
+            try:
+                downloaded = os.stat(file_path + ".crdownload").st_size
+                status = "Downloading"
+            except OSError:  # Rare case
+                await asyncio.sleep(1)
+                continue
+        elif os.path.isfile(file_path):
+            downloaded = os.stat(file_path).st_size
+            file_size = downloaded
+            status = "Checking"
+        else:
+            await asyncio.sleep(0.3)
+            continue
+        diff = time.time() - start
+        percentage = downloaded / file_size * 100
+        speed = round(downloaded / diff, 2)
+        eta = round((file_size - downloaded) / speed)
+        prog_str = "`{0}` | [{1}{2}] `{3}%`".format(
+            status,
+            "".join(["■" for i in range(math.floor(percentage / 10))]),
+            "".join(["▨" for i in range(10 - math.floor(percentage / 10))]),
+            round(percentage, 2),
         )
-        quit(1)
+        current_message = (
+            "`[DOWNLOAD]`\n\n"
+            f"`{file_name}`\n"
+            f"`Status`\n{prog_str}\n"
+            f"`{humanbytes(downloaded)} of {humanbytes(file_size)}"
+            f" @ {humanbytes(speed)}`\n"
+            f"`ETA` -> {time_formatter(eta)}"
+        )
+        if (
+            round(diff % 15.00) == 0
+            and display_message != current_message
+            or (downloaded == file_size)
+        ):
+            await dl.edit(current_message)
+            display_message = current_message
+        if downloaded == file_size:
+            if not os.path.isfile(file_path):  # Rare case
+                await asyncio.sleep(1)
+                continue
+            MD5 = await md5(file_path)
+            if md5_origin == MD5:
+                complete = True
+            else:
+                await dl.edit("`Download corrupt...`")
+                os.remove(file_path)
+                driver.quit()
+                return
+    await dl.respond(f"`{file_name}`\n\n" f"Successfully downloaded to `{file_path}`.")
+    await dl.delete()
+    driver.quit()
+    return
 
 
-with bot:
+@register(outgoing=True, pattern=r"^.specs(?: |)([\S]*)(?: |)([\s\S]*)")
+async def devices_specifications(request):
+    """ Mobile devices specifications """
+    textx = await request.get_reply_message()
+    brand = request.pattern_match.group(1).lower()
+    device = request.pattern_match.group(2).lower()
+    if brand and device:
+        pass
+    elif textx:
+        brand = textx.text.split(" ")[0]
+        device = " ".join(textx.text.split(" ")[1:])
+    else:
+        await request.edit("`Usage: .specs <brand> <device>`")
+        return
+    all_brands = (
+        BeautifulSoup(
+            get("https://www.devicespecifications.com/en/brand-more").content, "lxml"
+        )
+        .find("div", {"class": "brand-listing-container-news"})
+        .findAll("a")
+    )
+    brand_page_url = None
     try:
-        bot.loop.run_until_complete(check_botlog_chatid())
-    except BaseException:
-        LOGS.info(
-            "BOTLOG_CHATID environment variable isn't a "
-            "valid entity. Check your environment variables/config.env file."
-        )
-        quit(1)
+        brand_page_url = [
+            i["href"] for i in all_brands if brand == i.text.strip().lower()
+        ][0]
+    except IndexError:
+        await request.edit(f"`{brand} is unknown brand!`")
+    devices = BeautifulSoup(get(brand_page_url).content, "lxml").findAll(
+        "div", {"class": "model-listing-container-80"}
+    )
+    device_page_url = None
+    try:
+        device_page_url = [
+            i.a["href"]
+            for i in BeautifulSoup(str(devices), "lxml").findAll("h3")
+            if device in i.text.strip().lower()
+        ]
+    except IndexError:
+        await request.edit(f"`can't find {device}!`")
+    if len(device_page_url) > 2:
+        device_page_url = device_page_url[:2]
+    reply = ""
+    for url in device_page_url:
+        info = BeautifulSoup(get(url).content, "lxml")
+        reply = "\n" + info.title.text.split("-")[0].strip() + "\n"
+        info = info.find("div", {"id": "model-brief-specifications"})
+        specifications = re.findall(r"<b>.*?<br/>", str(info))
+        for item in specifications:
+            title = re.findall(r"<b>(.*?)</b>", item)[0].strip()
+            data = (
+                re.findall(r"</b>: (.*?)<br/>", item)[0]
+                .replace("<b>", "")
+                .replace("</b>", "")
+                .strip()
+            )
+            reply += f"**{title}**: {data}\n"
+    await request.edit(reply)
 
-# Global Variables
-COUNT_MSG = 0
-USERS = {}
-COUNT_PM = {}
-LASTMSG = {}
-CMD_HELP = {}
-ZALG_LIST = {}
-ISAFK = False
-AFKREASON = None
+
+@register(outgoing=True, pattern=r"^.twrp(?: |$)(\S*)")
+async def twrp(request):
+    """ get android device twrp """
+    textx = await request.get_reply_message()
+    device = request.pattern_match.group(1)
+    if device:
+        pass
+    elif textx:
+        device = textx.text.split(" ")[0]
+    else:
+        await request.edit("`Usage: .twrp <codename>`")
+        return
+    url = get(f"https://dl.twrp.me/{device}/")
+    if url.status_code == 404:
+        reply = f"`Couldn't find twrp downloads for {device}!`\n"
+        await request.edit(reply)
+        return
+    page = BeautifulSoup(url.content, "lxml")
+    download = page.find("table").find("tr").find("a")
+    dl_link = f"https://dl.twrp.me{download['href']}"
+    dl_file = download.text
+    size = page.find("span", {"class": "filesize"}).text
+    date = page.find("em").text.strip()
+    reply = (
+        f"**Latest TWRP for {device}:**\n"
+        f"[{dl_file}]({dl_link}) - __{size}__\n"
+        f"**Updated:** __{date}__\n"
+    )
+    await request.edit(reply)
+
+
+CMD_HELP.update(
+    {
+        "android": ".magisk\
+\nGet latest Magisk releases\
+\n\n.device <codename>\
+\nUsage: Get info about android device codename or model.\
+\n\n.codename <brand> <device>\
+\nUsage: Search for android device codename.\
+\n\n.pixeldl **<download.pixelexperience.org>**\
+\nUsage: Download pixel experience ROM into your userbot server.\
+\n\n.specs <brand> <device>\
+\nUsage: Get device specifications info.\
+\n\n.twrp <codename>\
+\nUsage: Get latest twrp download for android device."
+    }
+)
