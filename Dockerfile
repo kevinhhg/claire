@@ -1,4 +1,4 @@
-FROM movecrew/claire:alpine-latest
+FROM movecrew/one4ubot:alpine-latest
 
 RUN mkdir /claire && chmod 777 /claire
 ENV PATH="/claire/bin:$PATH"
