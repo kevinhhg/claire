@@ -12,6 +12,11 @@ RUN git clone https://github.com/kevinhhg/claire -b sql-extended /claire
 COPY ./sample_config.env ./userbot.session* ./config.env* /claire/
 
 #
+# Make open port TCP
+#
+EXPOSE 80 443
+
+#
 # Finalization
 #
 CMD ["python3","-m","userbot"]
