@@ -1,5 +1,4 @@
 <a href="https://github.com/kevinhhg/claire/actions?query=workflow%3Abuild%20check" > <img src="https://img.shields.io/github/workflow/status/kevinhhg/claire/build%20check/sql-extended?label=build%20check&style=flat&logo=github-actions&logoColor=white&color=blueviolet" alt="build%20check" /></a>
-<a href="https://github.com/kevinhhg/claire/actions?query=workflow%3Apylint"> <img src="https://img.shields.io/github/workflow/status/kevinhhg/claire/PyLint/sql-extended?label=pylint&style=flat&logo=github-actions&logoColor=white&color=blueviolet" alt="pylint" /></a><br>
 
 # claire userbot
 
