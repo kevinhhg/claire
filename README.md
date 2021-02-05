@@ -18,6 +18,9 @@
 /**
 ```
 
+## generate string session
+[![run repl.it](https://img.shields.io/badge/run-string__session.py-blueviolet?style=flat&logo=repl.it)](https://repl.it/@MoveAngel/UserbotSession?lite=1&outputonly=1)
+
 ## how to host
 
 <p align="left"><a href="https://heroku.com/deploy?template=https://github.com/kevinhhg/claire/tree/sql-extended"> <img src="https://www.herokucdn.com/deploy/button.svg" alt="deploy to heroku" /></a></p>

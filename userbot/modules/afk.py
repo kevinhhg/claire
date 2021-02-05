@@ -25,29 +25,29 @@ from userbot.events import register
 
 # ========================= CONSTANTS ============================
 AFKSTR = [
-    "I'm busy right now. Please talk in a bag and when I come back you can just give me the bag!",
-    "I'm away right now. If you need anything, leave a message after the beep:\n`beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeep`!",
-    "You missed me, next time aim better.",
-    "I'll be back in a few minutes and if I'm not...,\nwait longer.",
-    "I'm not here right now, so I'm probably somewhere else.",
-    "Roses are red,\nViolets are blue,\nLeave me a message,\nAnd I'll get back to you.",
-    "Sometimes the best things in life are worth waiting for…\nI'll be right back.",
-    "I'll be right back,\nbut if I'm not right back,\nI'll be back later.",
-    "If you haven't figured it out already,\nI'm not here.",
-    "Hello, welcome to my away message, how may I ignore you today?",
-    "I'm away over 7 seas and 7 countries,\n7 waters and 7 continents,\n7 mountains and 7 hills,\n7 plains and 7 mounds,\n7 pools and 7 lakes,\n7 springs and 7 meadows,\n7 cities and 7 neighborhoods,\n7 blocks and 7 houses...\n\nWhere not even your messages can reach me!",
-    "I'm away from the keyboard at the moment, but if you'll scream loud enough at your screen, I might just hear you.",
-    "I went that way\n---->",
-    "I went this way\n<----",
-    "Please leave a message and make me feel even more important than I already am.",
-    "I am not here so stop writing to me,\nor else you will find yourself with a screen full of your own messages.",
-    "If I were here,\nI'd tell you where I am.\n\nBut I'm not,\nso ask me when I return...",
-    "I am away!\nI don't know when I'll be back!\nHopefully a few minutes from now!",
-    "I'm not available right now so please leave your name, number, and address and I will stalk you later.",
-    "Sorry, I'm not here right now.\nFeel free to talk to my userbot as long as you like.\nI'll get back to you later.",
-    "I bet you were expecting an away message!",
-    "Life is so short, there are so many things to do...\nI'm away doing one of them..",
-    "I am not here right now...\nbut if I was...\n\nwouldn't that be awesome?",
+    "i'm busy right now. please talk in a bag and when i come back you can just give me the bag!",
+    "i'm away right now. if you need anything, leave a message after the beep:\n`beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeep`!",
+    "you missed me, next time aim better.",
+    "i'll be back in a few minutes and if i'm not...,\nwait longer.",
+    "i'm not here right now, so i'm probably somewhere else.",
+    "roses are red,\nviolets are blue,\nleave me a message,\nand i'll get back to you.",
+    "sometimes the best things in life are worth waiting for…\ni'll be right back.",
+    "i'll be right back,\nbut if i'm not right back,\ni'll be back later.",
+    "if you haven't figured it out already,\ni'm not here.",
+    "hello, welcome to my away message, how may i ignore you today?",
+    "i'm away over 7 seas and 7 countries,\n7 waters and 7 continents,\n7 mountains and 7 hills,\n7 plains and 7 mounds,\n7 pools and 7 lakes,\n7 springs and 7 meadows,\n7 cities and 7 neighborhoods,\n7 blocks and 7 houses...\n\nwhere not even your messages can reach me!",
+    "i'm away from the keyboard at the moment, but if you'll scream loud enough at your screen, i might just hear you.",
+    "i went that way\n---->",
+    "i went this way\n<----",
+    "please leave a message and make me feel even more important than i already am.",
+    "i am not here so stop writing to me,\nor else you will find yourself with a screen full of your own messages.",
+    "if i were here,\ni'd tell you where i am.\n\nbut i'm not,\nso ask me when i return...",
+    "i am away!\ni don't know when i'll be back!\nhopefully a few minutes from now!",
+    "i'm not available right now so please leave your name, number, and address and i will stalk you later.",
+    "sorry, i'm not here right now.\nfeel free to talk to my userbot as long as you like.\ni'll get back to you later.",
+    "i bet you were expecting an away message!",
+    "life is so short, there are so many things to do...\ni'm away doing one of them..",
+    "i am not here right now...\nbut if i was...\n\nwouldn't that be awesome?",
 ]
 
 global USER_AFK  # pylint:disable=E0602
@@ -81,13 +81,13 @@ async def set_afk(afk_e):
     if string:
         AFKREASON = string
         await afk_e.edit(
-            f"Going AFK!\
-        \nReason: `{string}`"
+            f"going afk!\
+        \nreason: `{string}`"
         )
     else:
-        await afk_e.edit("Going AFK!")
+        await afk_e.edit("going afk!")
     if BOTLOG:
-        await afk_e.client.send_message(BOTLOG_CHATID, "#AFK\nYou went AFK!")
+        await afk_e.client.send_message(BOTLOG_CHATID, "#AFK\nyou went afk!")
     ISAFK = True
     afk_time = datetime.now()  # pylint:disable=E0602
     raise StopPropagation
@@ -114,7 +114,7 @@ async def type_afk_is_not_true(notafk):
         if BOTLOG:
             await notafk.client.send_message(
                 BOTLOG_CHATID,
-                "You've recieved "
+                "you've recieved "
                 + str(COUNT_MSG)
                 + " messages from "
                 + str(len(USERS))
@@ -132,7 +132,7 @@ async def type_afk_is_not_true(notafk):
                 else:  # anon admin
                     await notafk.client.send_message(
                         BOTLOG_CHATID,
-                        "Anonymous admin in `" + i + "` sent you " + "`" +
+                        "anonymous admin in `" + i + "` sent you " + "`" +
                         str(USERS[i]) + " message(s)`",
                     )
         COUNT_MSG = 0
@@ -193,8 +193,8 @@ async def mention_afk(mention):
             if mention.sender_id not in USERS or chat_title not in USERS:
                 if AFKREASON:
                     await mention.reply(
-                        f"I'm AFK since {afk_since}.\
-                        \nReason: `{AFKREASON}`"
+                        f"i'm afk since {afk_since}.\
+                        \nreason: `{AFKREASON}`"
                     )
                 else:
                     await mention.reply(str(choice(AFKSTR)))
@@ -206,8 +206,8 @@ async def mention_afk(mention):
                 if USERS[mention.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
                         await mention.reply(
-                            f"I'm still AFK since {afk_since}.\
-                            \nReason: `{AFKREASON}`"
+                            f"i'm still afk since {afk_since}.\
+                            \nreason: `{AFKREASON}`"
                         )
                     else:
                         await mention.reply(str(choice(AFKSTR)))
@@ -260,7 +260,7 @@ async def afk_on_pm(sender):
             time %= 60
             seconds = time
             if days == 1:
-                afk_since = "Yesterday"
+                afk_since = "yesterday"
             elif days > 1:
                 if days > 6:
                     date = now + datetime.timedelta(
@@ -279,8 +279,8 @@ async def afk_on_pm(sender):
             if sender.sender_id not in USERS:
                 if AFKREASON:
                     await sender.reply(
-                        f"I'm AFK since {afk_since}.\
-                        \nReason: `{AFKREASON}`"
+                        f"i'm afk since {afk_since}.\
+                        \nreason: `{AFKREASON}`"
                     )
                 else:
                     await sender.reply(str(choice(AFKSTR)))
@@ -290,8 +290,8 @@ async def afk_on_pm(sender):
                 if USERS[sender.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
                         await sender.reply(
-                            f"I'm still AFK since {afk_since}.\
-                            \nReason: `{AFKREASON}`"
+                            f"i'm still afk since {afk_since}.\
+                            \nreason: `{AFKREASON}`"
                         )
                     else:
                         await sender.reply(str(choice(AFKSTR)))

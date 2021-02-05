@@ -14,7 +14,7 @@ from github import Github
 from userbot import CMD_HELP, GIT_REPO_NAME, GITHUB_ACCESS_TOKEN, bot
 from userbot.events import register
 
-GIT_TEMP_DIR = "/One4uBot/temp/"
+GIT_TEMP_DIR = "/claire/temp/"
 
 
 @register(outgoing=True, pattern=r".git (.*)")

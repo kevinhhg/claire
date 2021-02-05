@@ -41,10 +41,10 @@ async def sleepybot(time):
         str_counter = time_formatter(counter)
         await time.client.send_message(
             BOTLOG_CHATID,
-            f"You put the bot to sleep for {str_counter}.",
+            f"you put the bot to sleep for {str_counter}.",
         )
     sleep(counter)
-    await time.edit("`OK, I'm awake now.`")
+    await time.edit("`OK, i'm awake now.`")
 
 
 @register(outgoing=True, pattern="^.shutdown$")
@@ -71,14 +71,14 @@ async def killdabot(reboot):
 @register(outgoing=True, pattern="^.readme$")
 async def reedme(event):
     await event.edit(
-        "Here's something for you to read:\n"
-        "\n[One4uBot's README.md file](https://github.com/MoveAngel/One4uBot/blob/sql-extended/README.md)"
-        "\n[Setup Guide - Basic](https://telegra.ph/How-to-host-a-Telegram-Userbot-07-01-2)"
-        "\n[Setup Guide - Google Drive](https://telegra.ph/How-To-Setup-Google-Drive-04-03)"
-        "\n[Setup Guide - LastFM Module](https://telegra.ph/How-to-set-up-LastFM-module-for-Paperplane-userbot-11-02)"
-        "\n[Setup Guide - From MiHub with Pict](https://www.mihub.my.id/2020/05/jadiuserbot.html)"
-        "\n[Setup Guide - In Indonesian Language](https://telegra.ph/UserIndoBot-05-21-3)"
-        "\n[Instant Setup - Generate String Session](https://userbotsession.moveangel.repl.run)"
+        "here's something for you to read:\n"
+        "\n[claire's README.md file](https://github.com/kevinhhg/claire/blob/sql-extended/README.md)"
+        "\n[setup guide - basic](https://telegra.ph/How-to-host-a-Telegram-Userbot-07-01-2)"
+        "\n[setup guide - google drive](https://telegra.ph/How-To-Setup-Google-Drive-04-03)"
+        "\n[setup guide - lastfm module](https://telegra.ph/How-to-set-up-LastFM-module-for-Paperplane-userbot-11-02)"
+        "\n[setup guide - from mihub with pict](https://www.mihub.my.id/2020/05/jadiuserbot.html)"
+        "\n[setup guide - in indonesian language](https://telegra.ph/UserIndoBot-05-21-3)"
+        "\n[instant setup - generate string session](https://userbotsession.moveangel.repl.run)"
     )
 
 
