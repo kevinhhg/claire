@@ -1,6 +1,10 @@
-<a href="https://github.com/kevinhhg/claire/actions?query=workflow%3Abuild%20check" > <img src="https://img.shields.io/github/workflow/status/kevinhhg/claire/build%20check/sql-extended?label=build%20check&style=flat&logo=github-actions&logoColor=white&color=blueviolet" alt="build%20check" /></a>
+<a href="https://github.com/kevinhhg/claire/actions?query=workflow%3Abuild%20check" > <img src="https://img.shields.io/github/workflow/status/kevinhhg/claire/build%20check/sql-extended?label=build%20check&style=flat&logo=github-actions&logoColor=white&color=9cf" alt="build%20check" /></a>
+<a href="https://github.com/kevinhhg/claire/commits/sql-extended"><img src="https://img.shields.io/github/last-commit/kevinhhg/claire/sql-extended?label=last%20commit&style=flate&logo=github&color=9cf" alt="Commit" /></a>
 
-# claire userbot
+# claire
+a  modular telegram userbot running on Python3 with sqlalchemy database
+
+![logo](https://telegra.ph/file/2a3410632a16d2e9dc449.jpg)
 
 ```
 #include <std/disclaimer.h>
@@ -19,7 +23,7 @@
 ```
 
 ## generate string session
-[![run repl.it](https://img.shields.io/badge/run-string__session.py-blueviolet?style=flat&logo=repl.it)](https://repl.it/@MoveAngel/UserbotSession?lite=1&outputonly=1)
+[![run repl.it](https://img.shields.io/badge/run-string__session.py-9cf?style=flat&logo=repl.it)](https://repl.it/@MoveAngel/UserbotSession?lite=1&outputonly=1)
 
 ## how to host
 
@@ -41,4 +45,4 @@ and many more as [contributors](https://github.com/kevinhhg/claire/graphs/contri
 
 ## license
 
-[Raphielscape Public License](https://github.com/kevinhhg/claire/blob/sql-extended/LICENSE) - Version 1.d, February 2020
+licensed under [Raphielscape Public License](https://github.com/kevinhhg/claire/blob/sql-extended/LICENSE) - Version 1.d, February 2020
