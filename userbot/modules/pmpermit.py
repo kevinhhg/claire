@@ -233,7 +233,7 @@ async def approvepm(apprvpm):
         await apprvpm.edit("`User may already be approved.`")
         return
 
-    await apprvpm.edit(f"[{name0}](tg://user?id={uid}) `approved to PM!`")
+    await apprvpm.edit(f"[{name0}](tg://user?id={uid}) `approved to pm!`")
 
     if BOTLOG:
         await apprvpm.client.send_message(
@@ -262,14 +262,14 @@ async def disapprovepm(disapprvpm):
         name0 = str(aname.first_name)
 
     await disapprvpm.edit(
-        f"[{name0}](tg://user?id={disapprvpm.chat_id}) `Disaproved to PM!`"
+        f"[{name0}](tg://user?id={disapprvpm.chat_id}) `disapproved to pm!`"
     )
 
     if BOTLOG:
         await disapprvpm.client.send_message(
             BOTLOG_CHATID,
             f"[{name0}](tg://user?id={disapprvpm.chat_id})"
-            " was disapproved to PM you.",
+            " was disapproved to pm you.",
         )
 
 
@@ -282,12 +282,12 @@ async def blockpm(block):
         aname = replied_user.id
         name0 = str(replied_user.first_name)
         await block.client(BlockRequest(aname))
-        await block.edit("`You've been blocked!`")
+        await block.edit("`you've been blocked!`")
         uid = replied_user.id
     else:
         await block.client(BlockRequest(block.chat_id))
         aname = await block.client.get_entity(block.chat_id)
-        await block.edit("`You've been blocked!`")
+        await block.edit("`you've been blocked!`")
         name0 = str(aname.first_name)
         uid = block.chat_id
 
@@ -313,7 +313,7 @@ async def unblockpm(unblock):
         replied_user = await unblock.client.get_entity(reply.from_id)
         name0 = str(replied_user.first_name)
         await unblock.client(UnblockRequest(replied_user.id))
-        await unblock.edit("`You have been unblocked.`")
+        await unblock.edit("`you have been unblocked.`")
 
     if BOTLOG:
         await unblock.client.send_message(
